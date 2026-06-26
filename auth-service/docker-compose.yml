@@ -1,0 +1,44 @@
+# docker compose used to run multiple docker containers
+# Version of Docker Compose syntax
+version: "3.8"
+
+# Define services (containers)
+services:
+
+  # here we use postgress database service as database..we run that docker container
+  # Name of the database service
+  postgres:
+
+    # Docker image to use (official PostgreSQL image version 15)
+    image: postgres:15
+
+    # Custom container name (instead of random name)
+    container_name: study-db
+
+    # Always restart container if it stops or system reboots
+    restart: always
+
+    # Environment variables passed into PostgreSQL container
+    environment:
+
+      # Username for PostgreSQL database
+      POSTGRES_USER: admin
+
+      # Password for the database user
+      POSTGRES_PASSWORD: admin123
+
+      # Database that will be created automatically at startup
+      POSTGRES_DB: studydb
+
+    # Port mapping (host:container)
+    ports:
+      - "5432:5432"   # allows access via localhost:5432
+
+    # Persistent storage (prevents data loss when container stops)
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+# Define named volumes used above
+volumes:
+  pgdata:
