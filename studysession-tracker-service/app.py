@@ -12,6 +12,7 @@ import datetime
 # Environment variables (DB URL)
 import os
 
+from flask_cors import CORS
 
 # Create Flask app
 app = Flask(__name__)
@@ -27,6 +28,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # JWT secret key (used to sign tokens)
 app.config["JWT_SECRET_KEY"] = "secret"
 
+CORS(app)
 
 # Initialize database with app
 db.init_app(app)
@@ -41,7 +43,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return "Auth Service is running"
+    return "Study Service is running"
 # -------------------------
 # START STUDY SESSION
 # -------------------------
@@ -151,4 +153,4 @@ def health():
 if __name__ == "__main__":
 
     # Run API on port 5001
-    app.run(host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5002)

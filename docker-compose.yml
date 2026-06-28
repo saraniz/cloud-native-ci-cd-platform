@@ -5,40 +5,84 @@ version: "3.8"
 # Define services (containers)
 services:
 
-  # here we use postgress database service as database..we run that docker container
-  # Name of the database service
+  # -------------------------
+  # PostgreSQL Database
+  # -------------------------
   postgres:
-
-    # Docker image to use (official PostgreSQL image version 15)
     image: postgres:15
-
-    # Custom container name (instead of random name)
     container_name: study-db
-
-    # Always restart container if it stops or system reboots
     restart: always
 
-    # Environment variables passed into PostgreSQL container
     environment:
-
-      # Username for PostgreSQL database
       POSTGRES_USER: admin
-
-      # Password for the database user
       POSTGRES_PASSWORD: admin123
-
-      # Database that will be created automatically at startup
       POSTGRES_DB: studydb
 
-    # Port mapping (host:container)
     ports:
-      - "5432:5432"   # allows access via localhost:5432
+      - "5432:5432"
 
-    # Persistent storage (prevents data loss when container stops)
     volumes:
       - pgdata:/var/lib/postgresql/data
 
 
-# Define named volumes used above
+  # -------------------------
+  # AUTH SERVICE (Flask API)
+  # -------------------------
+  auth-service:
+    build: ./auth-service   # build use specific folder to run dockerfile place there
+    container_name: auth-service
+
+    restart: always
+
+    ports:
+      - "5001:5001"
+
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/studydb
+
+    # depends mean this happens after always postgress container run
+    depends_on:
+      - postgres
+
+
+  # -------------------------
+  # STUDY SERVICE (Flask API)
+  # -------------------------
+  study-service:
+    build: ./studysession-tracker-service
+    container_name: study-service
+
+    restart: always
+
+    ports:
+      - "5002:5002"
+
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/studydb
+
+    depends_on:
+      - postgres
+
+
+  # -------------------------
+  # FRONTEND (React + Nginx)
+  # -------------------------
+  frontend:
+    build: ./frontend
+    container_name: frontend
+
+    restart: always
+
+    ports:
+      - "3000:80"
+
+    depends_on:
+      - auth-service
+      - study-service
+
+
+# -------------------------
+# Persistent volume for DB
+# -------------------------
 volumes:
   pgdata:

@@ -13,12 +13,15 @@ from config import Config
 # Library for password hashing
 import bcrypt
 
+from flask_cors import CORS
 
 # Create Flask application instance
 app = Flask(__name__)
 
 # Load configuration (database, JWT secret, etc.)
 app.config.from_object(Config)
+
+CORS(app)
 
 # Bind SQLAlchemy database to Flask app
 db.init_app(app)
@@ -114,4 +117,4 @@ if __name__ == "__main__":
     # Run Flask server
     # host=0.0.0.0 → accessible from outside container/machine
     # port=5000 → default Flask API port
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
