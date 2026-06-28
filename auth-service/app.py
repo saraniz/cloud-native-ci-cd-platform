@@ -1,21 +1,14 @@
 import os
-os.environ.setdefault("DATABASE_URL", "sqlite:///auth_test.db")
-# Import Flask framework core tools
-from flask import Flask, request, jsonify
-
-# JWT (JSON Web Token) tools for authentication
-from flask_jwt_extended import JWTManager, create_access_token
-
-# Import database instance and User model
-from model import db, User
-
-# Import configuration class (DB URL, secret keys, etc.)
-from config import Config
-
-# Library for password hashing
 import bcrypt
 
+from flask import Flask, request, jsonify
+from flask_jwt_extended import JWTManager, create_access_token
 from flask_cors import CORS
+
+from model import db, User
+from config import Config
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///auth_test.db")
 
 
 # -------------------------
