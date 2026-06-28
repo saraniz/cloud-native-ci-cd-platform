@@ -5,11 +5,12 @@ on:
     branches: ["main"]
 
 jobs:
-  backend:
+
+  backend-services:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout-Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -17,16 +18,30 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Dependencies
-        working-directory: ./backend
+      - name: Install Auth Service Dependencies
+        working-directory: ./auth-service
         run: pip install -r requirements.txt
 
-      - name: Run Tests
-        working-directory: ./backend
+      - name: Test Auth Service
+        working-directory: ./auth-service
         run: pytest -v
 
-      - name: Lint Code
-        working-directory: ./backend
+      - name: Lint Auth Service
+        working-directory: ./auth-service
+        run: |
+          pip install flake8
+          flake8 .
+
+      - name: Install Study Service Dependencies
+        working-directory: ./studysession-tracker-service
+        run: pip install -r requirements.txt
+
+      - name: Test Study Service
+        working-directory: ./studysession-tracker-service
+        run: pytest -v
+
+      - name: Lint Study Service
+        working-directory: ./studysession-tracker-service
         run: |
           pip install flake8
           flake8 .
@@ -34,6 +49,7 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    needs: backend-services
 
     steps:
       - name: Checkout Code
@@ -55,11 +71,11 @@ jobs:
       - name: Build Frontend
         working-directory: ./frontend
         run: npm run build
-      
+
 
   docker:
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend-services, frontend]
 
     steps:
       - name: Checkout Code
@@ -68,13 +84,17 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Backend Image
-        run: docker build -t myapp-backend ./backend
+      - name: Build Auth Service Image
+        run: docker build -t myapp-auth ./auth-service
+
+      - name: Build Study Service Image
+        run: docker build -t myapp-study ./studysession-tracker-service
 
       - name: Build Frontend Image
         run: docker build -t myapp-frontend ./frontend
 
       - name: Push Images
         run: |
-          docker push myapp-backend
+          docker push myapp-auth
+          docker push myapp-study
           docker push myapp-frontend
