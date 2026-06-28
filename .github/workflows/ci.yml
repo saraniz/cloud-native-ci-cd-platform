@@ -18,13 +18,16 @@ jobs:
         with:
           python-version: "3.11"
 
+      # =========================
+      # AUTH SERVICE
+      # =========================
       - name: Install Auth Service Dependencies
         working-directory: ./auth-service
         run: pip install -r requirements.txt
 
       - name: Test Auth Service
         working-directory: ./auth-service
-        run: pytest -v
+        run: PYTHONPATH=. pytest -v
 
       - name: Lint Auth Service
         working-directory: ./auth-service
@@ -32,13 +35,16 @@ jobs:
           pip install flake8
           flake8 .
 
+      # =========================
+      # STUDY SERVICE
+      # =========================
       - name: Install Study Service Dependencies
         working-directory: ./studysession-tracker-service
         run: pip install -r requirements.txt
 
       - name: Test Study Service
         working-directory: ./studysession-tracker-service
-        run: pytest -v
+        run: PYTHONPATH=. pytest -v
 
       - name: Lint Study Service
         working-directory: ./studysession-tracker-service
@@ -84,6 +90,9 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # =========================
+      # BUILD IMAGES
+      # =========================
       - name: Build Auth Service Image
         run: docker build -t myapp-auth ./auth-service
 
@@ -93,6 +102,9 @@ jobs:
       - name: Build Frontend Image
         run: docker build -t myapp-frontend ./frontend
 
+      # =========================
+      # PUSH IMAGES
+      # =========================
       - name: Push Images
         run: |
           docker push myapp-auth
