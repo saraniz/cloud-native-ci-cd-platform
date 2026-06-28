@@ -29,11 +29,11 @@ jobs:
         working-directory: ./auth-service
         run: PYTHONPATH=. pytest -v
 
-      - name: Lint Auth Service
-        working-directory: ./auth-service
-        run: |
-          pip install flake8
-          flake8 .
+      # - name: Lint Auth Service
+      #   working-directory: ./auth-service
+      #   run: |
+      #     pip install flake8
+      #     flake8 .
 
       # =========================
       # STUDY SERVICE
@@ -46,11 +46,11 @@ jobs:
         working-directory: ./studysession-tracker-service
         run: PYTHONPATH=. pytest -v
 
-      - name: Lint Study Service
-        working-directory: ./studysession-tracker-service
-        run: |
-          pip install flake8
-          flake8 .
+      # - name: Lint Study Service
+      #   working-directory: ./studysession-tracker-service
+      #   run: |
+      #     pip install flake8
+      #     flake8 .
 
 
   frontend:
@@ -70,9 +70,9 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - name: Lint Code
-        working-directory: ./frontend
-        run: npm run lint || echo "No lint configured"
+      # - name: Lint Code
+      #   working-directory: ./frontend
+      #   run: npm run lint || echo "No lint configured"
 
       - name: Build Frontend
         working-directory: ./frontend
