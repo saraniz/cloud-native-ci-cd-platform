@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 
+
 # create database object
 db = SQLAlchemy()
+
 
 class StudySession(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,9 +1,10 @@
-# used to interact with a database using Python objects instead of raw SQL.
 from flask_sqlalchemy import SQLAlchemy
+
 
 # create database object
 # this object will manage connections to the db, allow creation of tables and execute queries
 db = SQLAlchemy()
+
 
 # define table name user
 # db.Model is the base class for all ORM models
