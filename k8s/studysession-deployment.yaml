@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: study-session-deployment
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: study
+
+  template:
+    metadata:
+      labels:
+        app: study
+
+    spec:
+      containers:
+        - name: study-session
+          image: amiezz/myapp-study:latest
+
+          ports:
+            - containerPort: 5002

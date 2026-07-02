@@ -1,8 +1,5 @@
-# docker compose used to run multiple docker containers
-# Version of Docker Compose syntax
 version: "3.8"
 
-# Define services (containers)
 services:
 
   # -------------------------
@@ -24,14 +21,21 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+    # IMPORTANT: ensures DB is ready before other services connect
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d studydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
 
   # -------------------------
   # AUTH SERVICE (Flask API)
   # -------------------------
   auth-service:
-    build: ./auth-service   # build use specific folder to run dockerfile place there
+    build: ./auth-service
     container_name: auth-service
-
     restart: always
 
     ports:
@@ -39,10 +43,11 @@ services:
 
     environment:
       DATABASE_URL: postgresql://admin:admin123@postgres:5432/studydb
+      JWT_SECRET_KEY: super-secret-key
 
-    # depends mean this happens after always postgress container run
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 
   # -------------------------
@@ -51,7 +56,6 @@ services:
   study-service:
     build: ./studysession-tracker-service
     container_name: study-service
-
     restart: always
 
     ports:
@@ -59,9 +63,11 @@ services:
 
     environment:
       DATABASE_URL: postgresql://admin:admin123@postgres:5432/studydb
+      JWT_SECRET_KEY: super-secret-key
 
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 
   # -------------------------
@@ -70,7 +76,6 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
-
     restart: always
 
     ports:
@@ -82,7 +87,7 @@ services:
 
 
 # -------------------------
-# Persistent volume for DB
+# Persistent storage
 # -------------------------
 volumes:
   pgdata:
