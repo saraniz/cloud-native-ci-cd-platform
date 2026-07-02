@@ -15,6 +15,6 @@ venv/
 # OS files
 .DS_Store
 
-# Screenshot assets
-screenshots/
+# # Screenshot assets
+# screenshots/
 
