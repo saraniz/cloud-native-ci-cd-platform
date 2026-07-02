@@ -7,6 +7,9 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from flask_cors import CORS
 from sqlalchemy.exc import OperationalError
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from flask import Response
+from werkzeug.exceptions import HTTPException
 
 from model import db, StudySession
 from config import Config
@@ -21,6 +24,36 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localh
 
 db.init_app(app)
 jwt = JWTManager(app)
+
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP Requests",
+    ["method", "endpoint", "status"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "Request latency in seconds",
+    ["endpoint"]
+)
+
+
+@app.before_request
+def start_timer():
+    request.start_time = time.time()
+
+
+@app.after_request
+def record_metrics(response):
+    if hasattr(request, "start_time"):
+        latency = time.time() - request.start_time
+        REQUEST_COUNT.labels(
+            request.method,
+            request.path,
+            response.status_code,
+        ).inc()
+        REQUEST_LATENCY.labels(request.path).observe(latency)
+    return response
 
 # -------------------------
 # DB INIT WITH RETRY LOGIC
@@ -62,6 +95,8 @@ def init_db():
 @app.errorhandler(Exception)
 def handle_error(e):
     print(traceback.format_exc())
+    if isinstance(e, HTTPException):
+        return jsonify({"error": e.description}), e.code
     return jsonify({"error": str(e)}), 500
 
 # -------------------------
@@ -163,6 +198,11 @@ def get_sessions():
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"}), 200
+
+
+@app.route("/metrics")
+def metrics():
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 # -------------------------
 # RUN SERVER

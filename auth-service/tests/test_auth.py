@@ -22,3 +22,9 @@ def test_login_route_exists():
     })
 
     assert response.status_code in [200, 401]
+
+
+def test_metrics():
+    client = app.test_client()
+    response = client.get("/metrics")
+    assert response.status_code == 200
